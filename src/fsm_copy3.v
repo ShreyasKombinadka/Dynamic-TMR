@@ -1,10 +1,6 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Module: fsm_copy3
-// Notes: Verilog-2001, identical behavior to fsm_copy1/2 for TMR consistency.
-//////////////////////////////////////////////////////////////////////////////////
 
-module fsm_copy3 #(
+module fsm_copy1 #(
     parameter [3:0] DEFAULT_SPEED = 4'd5,  // default cruising speed
     parameter [3:0] DEFAULT_DIR   = 4'd8   // neutral direction
 )(
@@ -30,12 +26,13 @@ module fsm_copy3 #(
 
     reg [1:0] state, next_state;
 
-    // --- Last UART command storage ---
+    // --- Memory for last UART command ---
     reg [3:0] last_speed;
     reg [3:0] last_dir;
 
-    // --- Combinational next-state logic ---
+    // --- Next-state combinational logic ---
     always @(*) begin
+        // Default hold
         next_state = NORMAL;
         if (f1 && f2)
             next_state = REDUCE_SPEED;
@@ -45,7 +42,7 @@ module fsm_copy3 #(
             next_state = TURN_RIGHT;
     end
 
-    // --- Sequential logic ---
+    // --- Sequential FSM ---
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             state       <= NORMAL;
@@ -56,45 +53,58 @@ module fsm_copy3 #(
         end else if (enable) begin
             state <= next_state;
 
-            // Update UART-derived setpoints only in manual mode (mode==0)
+            // Update stored UART values only if mode == 0 (manual)
             if (mode == 4'd0) begin
                 last_speed <= speed_in;
                 last_dir   <= dir_in;
             end
 
-            // Begin with the last known setpoints
+            // Start each cycle with last known speed/dir
             speed_out <= last_speed;
             dir_out   <= last_dir;
 
-            // Sensor-driven behavior
-            case (next_state)
+            // Adjust based on sensors / current state
+            case ( next_state )
                 REDUCE_SPEED:
-                    if (speed_out > 4'd0)
-                        speed_out <= speed_out - 1'b1;
+                begin
+                    if ( speed_out > 0 ) speed_out <= speed_out - 1'b1 ;
+                    else speed_out = 0 ;
+                end
 
                 TURN_LEFT:
-                    if (dir_out > 4'd0)
-                        dir_out <= dir_out - 1'b1;
+                begin
+                    if ( dir_out > 0 ) dir_out <= dir_out - 1'b1 ;
+                    else dir_out = 0 ;
+                end
 
                 TURN_RIGHT:
-                    if (dir_out < 4'd15)
-                        dir_out <= dir_out + 1'b1;
+                begin
+                    if ( dir_out < 4'd15 ) dir_out <= dir_out + 1'b1 ;
+                    else dir_out = 0 ;
+                end
 
                 NORMAL: begin
-                    // Gradually re-center direction to DEFAULT_DIR
-                    if (dir_out < DEFAULT_DIR)
-                        dir_out <= dir_out + 1'b1;
-                    else if (dir_out > DEFAULT_DIR)
+                    // Gradually return to neutral direction
+                    if ( ( dir_out < DEFAULT_DIR ) or ( speed_out < DEFAULT_SPEED ) )
+                    begin
+                        dir_out <= dir_out + 1'b1 ;
+                        speed_out <= speed_out + 1'b1 ;
+                    end
+
+                    else if ( ( dir_out > DEFAULT_DIR ) && ( speed_out > DEFAULT_SPEED ) )
+                    begin
                         dir_out <= dir_out - 1'b1;
+                        speed_out <= speed_out - 1'b1 ;
+                    end
                 end
             endcase
 
-            // Back sensors boost speed (saturating at 15)
+            // Boost speed slightly if any back sensor active
             if (b1 || b2)
                 if (speed_out < 4'd15)
                     speed_out <= speed_out + 1'b1;
         end
-        // else: hold outputs when not enabled
+        // else: if not enabled, hold last outputs automatically
     end
 
 endmodule

@@ -1,14 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Module: fsm_copy1
-// Function:
-//   - Controls speed and direction based on UART commands + sensor inputs.
-//   - When disabled, holds its last outputs.
-//   - When enabled, adjusts speed/dir dynamically per sensors.
-// Notes:
-//   - Written fully in Verilog-2001 (no SystemVerilog syntax).
-//   - Safe for FPGA synthesis on Arty S7-25.
-//////////////////////////////////////////////////////////////////////////////////
 
 module fsm_copy1 #(
     parameter [3:0] DEFAULT_SPEED = 4'd5,  // default cruising speed
@@ -64,7 +54,7 @@ module fsm_copy1 #(
             state <= next_state;
 
             // Update stored UART values only if mode == 0 (manual)
-            if (mode == 4'd0) begin
+            if (mode == 1'b0) begin
                 last_speed <= speed_in;
                 last_dir   <= dir_in;
             end
@@ -74,25 +64,38 @@ module fsm_copy1 #(
             dir_out   <= last_dir;
 
             // Adjust based on sensors / current state
-            case (next_state)
+            case ( next_state )
                 REDUCE_SPEED:
-                    if (speed_out > 0)
-                        speed_out <= speed_out - 1'b1;
+                begin
+                    if ( speed_out > 0 ) speed_out <= speed_out - 1'b1 ;
+                    else speed_out = 0 ;
+                end
 
                 TURN_LEFT:
-                    if (dir_out > 0)
-                        dir_out <= dir_out - 1'b1;
+                begin
+                    if ( dir_out > 0 ) dir_out <= dir_out - 1'b1 ;
+                    else dir_out = 0 ;
+                end
 
                 TURN_RIGHT:
-                    if (dir_out < 4'd15)
-                        dir_out <= dir_out + 1'b1;
+                begin
+                    if ( dir_out < 4'd15 ) dir_out <= dir_out + 1'b1 ;
+                    else dir_out = 0 ;
+                end
 
                 NORMAL: begin
                     // Gradually return to neutral direction
-                    if (dir_out < DEFAULT_DIR)
-                        dir_out <= dir_out + 1'b1;
-                    else if (dir_out > DEFAULT_DIR)
+                    if ( ( dir_out < DEFAULT_DIR ) or ( speed_out < DEFAULT_SPEED ) )
+                    begin
+                        dir_out <= dir_out + 1'b1 ;
+                        speed_out <= speed_out + 1'b1 ;
+                    end
+
+                    else if ( ( dir_out > DEFAULT_DIR ) && ( speed_out > DEFAULT_SPEED ) )
+                    begin
                         dir_out <= dir_out - 1'b1;
+                        speed_out <= speed_out - 1'b1 ;
+                    end
                 end
             endcase
 
