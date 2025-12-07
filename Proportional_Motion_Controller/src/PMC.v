@@ -1,4 +1,4 @@
-module FSM #( 
+module PMC #(   // Proportional Motion Controller
     parameter default_speed = 5,
     parameter default_dir = 8
 )(
@@ -12,8 +12,8 @@ module FSM #(
     output [3:0] dir_o  // Processed direction
 );
 
-reg [3:0] speed_n ; // Next speed value
-reg [3:0] dir_n ;   // Next dir value
+reg [3:0] speed_n ; // New speed value
+reg [3:0] dir_n ;   // New dir value
 
 always  @( posedge clk or posedge rst )
 begin
