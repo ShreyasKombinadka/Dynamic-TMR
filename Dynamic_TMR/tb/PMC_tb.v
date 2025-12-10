@@ -9,15 +9,14 @@ reg f1, f2, b1, b2;
 wire [3:0] speed_o ;
 wire [3:0] dir_o ;
 
-PMC dut( .clk(clk), .rst(rst), .en(en), .speed(speed), .dir(dir), .mode(mode), .f1(f1), .f2(f2), .b1(b1), .b2(b2), .speed_o(speed_o), .dir_o(dir_o) );
+PMC dut( .clk(clk), .rst(rst), .speed(speed), .dir(dir), .mode(mode), .f1(f1), .f2(f2), .b1(b1), .b2(b2), .speed_o(speed_o), .dir_o(dir_o) );
 
 initial clk = 0 ;
 always #5 clk = ~clk ;
 
 initial begin
-    rst = 1 ; en = 0 ; speed = 0 ; dir = 0 ; mode = 0 ; {f1, f2, b1, b2} = 0 ; repeat(2) @(negedge clk) ;
+    rst = 1 ; speed = 0 ; dir = 0 ; mode = 0 ; {f1, f2, b1, b2} = 0 ; repeat(2) @(negedge clk) ;
     rst = 0 ; repeat(10) @(negedge clk) ;
-    en = 1 ;
     speed = 10 ; dir = 5 ; input_sim() ;
     speed = 10 ; dir = 6 ; mode = 1 ; input_sim() ;
     speed = 15 ; dir = 2 ; mode = 2 ; input_sim() ;
