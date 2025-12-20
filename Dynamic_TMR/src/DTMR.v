@@ -4,8 +4,8 @@ module DTMR (
     input [3:0] dir,    // Received direcction
     input [1:0] mode,   // Received operation mode
     input [3:0] err_rate,       // Rate of errors in received data
-    input f1, f2,   // Front sensors (active low)
-    input b1, b2,   // Back sensors (active low)
+    input f1, f2,   // Front sensors
+    input b1, b2,   // Back sensors
     output [3:0] speed_o,   // Processed speed
     output [3:0] dir_o,  // Processed direction
     output [2:0] fault,  // Faulty module
@@ -56,7 +56,8 @@ PMC PMC_3( .clk(clk), .rst(rst),
 maj_vote Majority_voter( .state(state),
                          .s1(s1), .s2(s2), .s3(s3),
                          .d1(d1), .d2(d2), .d3(d3),
-                         .speed(speed_o), .dir(dir_o)
+                         .speed(speed_o), .dir(dir_o),
+                         .fault(fault)
                         );
 
 endmodule

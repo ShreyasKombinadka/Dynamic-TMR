@@ -19,12 +19,11 @@ initial clk = 0 ;
 always #5 clk = ~clk ;
 
 initial begin
-    rst = 1 ; speed = 0 ; dir = 0 ; mode = 0 ; {f1, f2, b1, b2} = 0 ; repeat(2) @(negedge clk) ;
-    rst = 0 ;
-    speed = 10 ; dir = 5 ; input_sim() ;    // Auto mode
-    speed = 10 ; dir = 6 ; mode = 1 ; input_sim() ; // Hybrid mode
-    speed = 15 ; dir = 2 ; mode = 2 ; input_sim() ; // Manual mode
-    speed = 10 ; dir = 5 ; mode = 3 ; input_sim() ; // Sleep mode
+    rst = 1 ; speed = 0 ; dir = 0 ; mode = 0 ; err_rate = 0 ; {f1, f2, b1, b2} = 0 ; repeat(2) @(negedge clk) ;
+    rst = 0 ; input_sim() ;     // Auto mode
+    mode = 1 ; input_sim() ;    // Hybrid mode
+    mode = 2 ; input_sim() ;    // Manual mode
+    mode = 3 ; input_sim() ;    // Sleep mode
     
     @(negedge clk) ; $finish ;
 end
@@ -32,17 +31,23 @@ end
 task input_sim ;    //  Task to go through all the sensor sequences
 integer i ;
 begin
-    for(i = 0 ; i < 7 ; i = i + 1)
+    err_rate = 0 ;
+    {f1, f2, b1, b2} = 0 ;
+    for(i = 0 ; i <= 8 ; i = i + 1)
     begin
         case(i)
-            0 : {f1, f2, b1, b2} = 4'b0011 ;
-            1 : {f1, f2, b1, b2} = 4'b1100 ;
-            2 : {f1, f2, b1, b2} = 4'b0111 ;
-            3 : {f1, f2, b1, b2} = 4'b1011 ;
-            4 : {f1, f2, b1, b2} = 4'b0100 ;
-            5 : {f1, f2, b1, b2} = 4'b1000 ;
+            0 : {f1, f2, b1, b2} = 4'b1100 ;
+            1 : {f1, f2, b1, b2} = 4'b0011 ;
+            2 : {f1, f2, b1, b2} = 4'b1000 ;
+            3 : {f1, f2, b1, b2} = 4'b0100 ;
+            4 : {f1, f2, b1, b2} = 4'b1011 ;
+            5 : {f1, f2, b1, b2} = 4'b0111 ;
             6 : {f1, f2, b1, b2} = 4'b1111 ;
+            7 : {f1, f2, b1, b2} = 0 ;
+            8 : err_rate = 10 ;
         endcase
+        speed = speed + 1 ;
+        dir = dir + 1 ;
         repeat(10) @(negedge clk) ;
     end
 end

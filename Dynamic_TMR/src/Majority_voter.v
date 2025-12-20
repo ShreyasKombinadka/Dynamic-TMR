@@ -26,9 +26,10 @@ begin
     begin
         speed = s1 ;
         dir = d1 ;
+        {f1, f2, f3} = 0 ;
     end
 end
 
-assign fault = ( state ) ? {f3, f2, f1} : 0 ;
+assign fault = ( state == 1 ) ? {f3, f2, f1} : 0 ;
 
 endmodule

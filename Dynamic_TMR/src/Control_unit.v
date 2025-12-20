@@ -1,6 +1,6 @@
 module ctrl (
-    input f1, f2,   // Front sensors (active low)
-    input b1, b2,   // Back sensors (active low)
+    input f1, f2,   // Front sensors
+    input b1, b2,   // Back sensors
     input [3:0] err_rate,
     output reg [2:0] en,
     output reg state
