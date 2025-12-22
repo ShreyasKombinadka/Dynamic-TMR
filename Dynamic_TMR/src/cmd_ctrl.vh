@@ -5,8 +5,8 @@ begin
 
     cmd_ctrl = current ;
 
-    if (cmd_ctrl < target) cmd_ctrl = cmd_ctrl+ 1 ;
-    else if (cmd_ctrl > target) cmd_ctrl = cmd_ctrl - 1 ;
+    if (cmd_ctrl < target) cmd_ctrl = cmd_ctrl + 1 ; // Increase
+    else if (cmd_ctrl > target) cmd_ctrl = cmd_ctrl - 1 ;   // Decrese
 
 end
 endfunction
