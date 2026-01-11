@@ -1,16 +1,16 @@
 `timescale 1ns / 1ps
 
 module DTMR_tb ;
-reg clk, rst ;  // Clock and Reset
-reg [3:0] speed_cmd_i ;   // Received speed
-reg [3:0] dir_cmd_i ; // Received direcction
-reg [1:0] mode ;    // Received operation mode
-reg [3:0] err_rate ; // Rate of errors in received data
-reg f1, f2, b1, b2 ;    // Sensors (active low)
+reg clk, rst ;              // Clock and Reset
+reg [3:0] speed_cmd_i ;     // Received speed
+reg [3:0] dir_cmd_i ;       // Received direcction
+reg [1:0] mode ;            // Received operation mode
+reg [3:0] err_rate ;        // Rate of errors in received data
+reg f1, f2, b1, b2 ;        // Sensors (active low)
 wire [3:0] speed_cmd_o ;    // Processed speed
-wire [3:0] dir_cmd_o ;  // Processed direction
-wire [2:0] fault ;  // Faulty module
-wire state_o ;  // State probe for monitoring
+wire [3:0] dir_cmd_o ;      // Processed direction
+wire [2:0] fault ;          // Faulty module
+wire state_o ;              // State probe for monitoring
 
 
 DTMR dut(.clk(clk), .rst(rst),

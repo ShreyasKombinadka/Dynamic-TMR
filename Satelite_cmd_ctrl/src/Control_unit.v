@@ -1,9 +1,9 @@
 module ctrl (
-    input f1, f2,           // Front sensors
-    input b1, b2,           // Back sensors
+    input f1, f2,   // Front sensors
+    input b1, b2,   // Back sensors
     input [3:0] err_rate,   // Rate of errors in received data
     output reg [2:0] en,    // Enable signal for TMR modules
-    output reg state        // Operation state
+    output reg state    // Operation state
 );
 
 always @( * )
@@ -12,9 +12,9 @@ begin
     en = 0 ;
     
     case ( state )
-        0 : en = 3'b001 ;       // Normal operation
-        1 : en = 3'b111 ;       // TMR operation
-        default : en = 3'b111 ; // By default enable all
+        0 : en = 3'b001 ;   // Normal operation
+        1 : en = 3'b111 ;   // TMR operation
+        default : en = 3'b111 ;
     endcase
 end
 
