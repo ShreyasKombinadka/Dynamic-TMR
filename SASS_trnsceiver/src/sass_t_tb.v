@@ -13,15 +13,15 @@ always #5 clk = ~clk ;  // Generating clk
 initial begin
     rst = 1 ; send = 0 ; data = 0 ;             // Initialize
     @(negedge clk) ; rst = 0 ; data = 8'd135 ;  // Data to send
-    repeat(5) @(negedge clk) ;                  // After 5 cycles
+    repeat(5) @(negedge clk) ;                  // Wait 5 cycles
     @(negedge clk) ; send = 1 ;                 // Start the transmission
     @(negedge clk) ; send = 0 ;                 // Clear transmission flag 
-    repeat(10000) @(negedge clk) ;              // After 10K cycles
+    repeat(10000) @(negedge clk) ;              // Wait 10K cycles
     @(negedge clk) ; data = 8'd95 ;             // Data to send
-    repeat(5) @(negedge clk) ;                  // After 5 cycles
+    repeat(5) @(negedge clk) ;                  // Wait 5 cycles
     @(negedge clk) ; send = 1 ;                 // Start the transmission
     @(negedge clk) ; send = 0 ;                 // Clear transmission flag 
-    repeat(10000) @(negedge clk) ; $finish ;    // After 10K cycles
+    repeat(10000) @(negedge clk) ; $finish ;    // Wait 10K cycles
 end
 
 endmodule
