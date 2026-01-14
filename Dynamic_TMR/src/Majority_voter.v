@@ -23,9 +23,9 @@ begin
     begin
         speed_cmd_d = ( s3_cmd & ( s1_cmd ^ s2_cmd ) ) | ( s1_cmd & s2_cmd ) ;    // Speed command majority voting
         dir_cmd_d = ( d3_cmd & ( d1_cmd ^ d2_cmd ) ) | ( d1_cmd & d2_cmd ) ;  // Dir command majority voting
-        f1 = ( s1_cmd != speed_cmd_o && d1_cmd != dir_cmd_o ) ; // Flag module 1
-        f2 = ( s2_cmd != speed_cmd_o && d2_cmd != dir_cmd_o ) ; // Flag module 2
-        f3 = ( s3_cmd != speed_cmd_o && d3_cmd != dir_cmd_o ) ; // Flag module 3
+        f1 = ( s1_cmd != speed_cmd_d || d1_cmd != dir_cmd_d ) ; // Flag module 1
+        f2 = ( s2_cmd != speed_cmd_d || d2_cmd != dir_cmd_d ) ; // Flag module 2
+        f3 = ( s3_cmd != speed_cmd_d || d3_cmd != dir_cmd_d ) ; // Flag module 3
     end
     else    // In normal conditon just pass the values of one module
     begin

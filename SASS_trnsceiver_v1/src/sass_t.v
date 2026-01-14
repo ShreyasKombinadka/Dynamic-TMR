@@ -1,8 +1,8 @@
-module sass_t #(    // SASS transmitter
-    parameter data_l = 8,               // Length of data to be sent
-              clk_freq = 50_000_000,    // Clock frequency
-              range = 1_000_000,        // range of count in time
-              t = 300                   // Bit duration
+module sass_t #(    // SASS transmitter v1
+    parameter data_l = 8,           // Length of data to be sent
+              clk_f = 50_000_000,   // Clock frequency
+              range = 1_000_000,    // Range
+              t = 300               // Bit duration
 )(
     input clk, rst,
     input send,                 // Flag to start the transmission
@@ -11,11 +11,11 @@ module sass_t #(    // SASS transmitter
     output s                    // Output line
 );
 
-localparam t_d = (clk_freq * t / range) ;   // Calculating edges needed for the bit duration
-localparam bit_count = $clog2(data_l + 1) ;  // Data bits + frame bits count
+localparam t_d = (clk_f * t / range) ;      // Bit duration in terms of clock frequency
+localparam bit_count = $clog2(data_l + 1) ; // Data bits + frame bits count
 localparam t_count = $clog2(t_d + 1) ;      // Bit duration count
 
-reg [data_l:0] data_f ;      // Data frame
+reg [data_l:0] data_f ;     // Data frame
 reg st ;                    // Register to store the data bit to be put on the line
 reg en ;                    // Enable flag for self locking
 reg [bit_count-1:0] bit ;   // counter to count bits of data
