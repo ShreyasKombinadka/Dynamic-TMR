@@ -1,22 +1,28 @@
 module PCC #(   // Praportional Command Controller
-    parameter def_speed_cmd = 5,
-    parameter def_dir_cmd = 8
+    parameter
+    def_speed_cmd = 5,      // Default speed command
+    def_dir_cmd = 8,        // Default speed command
+    cmd_l = 4               // Command length
 )(
-    input clk, rst,                 // Clock and Reset
-    input en,                       // Enable signal
-    input [3:0] speed_cmd_i,        // Received speed command
-    input [3:0] dir_cmd_i,          // Received direcction command
-    input [1:0] mode,               // Received soperation mode
-    input f1, f2,                   // Front sensors
-    input b1, b2,                   // Back sensors
-    output reg [3:0] speed_cmd_o,   // Processed speed command
-    output reg [3:0] dir_cmd_o      // Processed direction command
+    input clk, rst,                     // Clock and Reset
+    input en,                           // Enable signal
+    input [cmd_l-1:0] speed_cmd_i,      // Received speed command
+    input [cmd_l-1:0] dir_cmd_i,        // Received direcction command
+    input [1:0] mode,                   // Received soperation mode
+    input f1, f2,                       // Front sensors
+    input b1, b2,                       // Back sensors
+    input state,
+    input [cmd_l-1:0] speed_cmd_prev,
+    input [cmd_l-1:0] dir_cmd_prev,
+    output reg [cmd_l-1:0] speed_cmd_o, // Processed speed command
+    output reg [cmd_l-1:0] dir_cmd_o    // Processed direction command
 );
 
-`include "cmd_ctrl.vh"
+`include "cmd_ctrl.vh"  // Command smoothing function
 
-reg [3:0] speed_cmd_d ; // Desired speed command value
-reg [3:0] dir_cmd_d ;   // Desired dir command value
+reg [cmd_l-1:0] speed_cmd_d ; // Desired speed command value
+reg [cmd_l-1:0] dir_cmd_d ;   // Desired dir command value
+reg state_prev ;
 
 always @(*)
 begin
@@ -128,18 +134,28 @@ begin
     endcase
 end
 
-always  @( posedge clk or posedge rst )
+always  @(posedge clk or posedge rst)
 begin
-    if ( rst )
+    if (rst)
     begin
         speed_cmd_o <= 0 ;
         dir_cmd_o <= 0 ;
+        state_prev <= 0 ;
     end
-    else if (en)
+
+    else if(state != state_prev && state == 1)
+    begin
+        speed_cmd_o <= speed_cmd_prev ;
+        dir_cmd_o <= dir_cmd_prev ;
+    end
+
+    else if(en)
     begin
         speed_cmd_o <= cmd_ctrl(speed_cmd_o, speed_cmd_d) ;     // Use praportional control for speed command
         dir_cmd_o <= cmd_ctrl(dir_cmd_o, dir_cmd_d) ;           // Use praportional control for speed command
     end
+
+    state_prev <= state ;
 end
 
 endmodule

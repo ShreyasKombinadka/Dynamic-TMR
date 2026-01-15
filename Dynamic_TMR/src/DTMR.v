@@ -1,15 +1,20 @@
-module DTMR (
-    input clk, rst, // Clock and Reset
-    input [3:0] speed_cmd_i,  // Received speed command
-    input [3:0] dir_cmd_i,    // Received direcction command
-    input [1:0] mode,   // Received operation mode
-    input [3:0] err_rate,       // Rate of errors in received data
-    input f1, f2,   // Front sensors
-    input b1, b2,   // Back sensors
-    output [3:0] speed_cmd_o,   // Processed speed command
-    output [3:0] dir_cmd_o,  // Processed direction command
-    output [2:0] fault,  // Faulty module
-    output state_o    // State probe for monitoring
+module DTMR #(
+        parameter
+        def_speed_cmd = 5,      // Default speed command
+        def_dir_cmd = 8,        // Default speed command
+        cmd_l = 4               // Command length
+)(
+    input clk, rst,                     // Clock and Reset
+    input [cmd_l-1:0] speed_cmd_i,      // Received speed command
+    input [cmd_l-1:0] dir_cmd_i,        // Received direcction command
+    input [1:0] mode,                   // Received operation mode
+    input [cmd_l-1:0] err_rate,         // Rate of errors in received data
+    input f1, f2,                       // Front sensors
+    input b1, b2,                       // Back sensors
+    output [cmd_l-1:0] speed_cmd_o,     // Processed speed command
+    output [cmd_l-1:0] dir_cmd_o,       // Processed direction command
+    output [2:0] fault,                 // Faulty module
+    output state_o                      // State probe for monitoring
 );
 
 //------------------------------------------------
@@ -22,31 +27,36 @@ ctrl TMR_Control( .f1(f1), .f2(f2), .b1(b1), .b2(b2), .err_rate(err_rate), .en(e
 
 assign state_o = state ; // State probe for monitoring
 
+wire [cmd_l-1:0] speed_cmd_prev ;
+wire [cmd_l-1:0] dir_cmd_prev ;
 
 //------------------------------------------------
 // PCM blocks for DTMR
 //------------------------------------------------
-wire [3:0] s1_cmd ; // Speed command 1
-wire [3:0] d1_cmd ; // Direction command 1
-PCC PCC_1( .clk(clk), .rst(rst), 
+wire [cmd_l-1:0] s1_cmd ; // Speed command 1
+wire [cmd_l-1:0] d1_cmd ; // Direction command 1
+PCC #(.def_speed_cmd(def_speed_cmd), .def_dir_cmd(def_dir_cmd), .cmd_l(cmd_l)) PCC_1( .clk(clk), .rst(rst), 
            .en(en[0]), .speed_cmd_i(speed_cmd_i), .dir_cmd_i(dir_cmd_i), .mode(mode),
-           .f1(f1), .f2(f2), .b1(b1), .b2(b2), 
+           .f1(f1), .f2(f2), .b1(b1), .b2(b2),
+           .state(state), .speed_cmd_prev(speed_cmd_prev), .dir_cmd_prev(dir_cmd_prev),
            .speed_cmd_o(s1_cmd), .dir_cmd_o(d1_cmd)
         );
 
-wire [3:0] s2_cmd ; // Speed command 2
-wire [3:0] d2_cmd ; // Direction command 2
-PCC PCC_2( .clk(clk), .rst(rst),
+wire [cmd_l-1:0] s2_cmd ; // Speed command 2
+wire [cmd_l-1:0] d2_cmd ; // Direction command 2
+PCC #(.def_speed_cmd(def_speed_cmd), .def_dir_cmd(def_dir_cmd), .cmd_l(cmd_l)) PCC_2( .clk(clk), .rst(rst),
            .en(en[1]), .speed_cmd_i(speed_cmd_i), .dir_cmd_i(dir_cmd_i), .mode(mode),
            .f1(f1), .f2(f2), .b1(b1), .b2(b2),
+           .state(state), .speed_cmd_prev(speed_cmd_prev), .dir_cmd_prev(dir_cmd_prev),
            .speed_cmd_o(s2_cmd), .dir_cmd_o(d2_cmd)
         );
 
-wire [3:0] s3_cmd ; // Speed command 3
-wire [3:0] d3_cmd ; // Direction command 3
-PCC PCC_3( .clk(clk), .rst(rst),
+wire [cmd_l-1:0] s3_cmd ; // Speed command 3
+wire [cmd_l-1:0] d3_cmd ; // Direction command 3
+PCC #(.def_speed_cmd(def_speed_cmd), .def_dir_cmd(def_dir_cmd), .cmd_l(cmd_l)) PCC_3( .clk(clk), .rst(rst),
            .en(en[2]), .speed_cmd_i(speed_cmd_i), .dir_cmd_i(dir_cmd_i), .mode(mode),
            .f1(f1), .f2(f2), .b1(b1), .b2(b2),
+           .state(state), .speed_cmd_prev(speed_cmd_prev), .dir_cmd_prev(dir_cmd_prev),
            .speed_cmd_o(s3_cmd), .dir_cmd_o(d3_cmd)
         );
 
@@ -54,12 +64,13 @@ PCC PCC_3( .clk(clk), .rst(rst),
 //------------------------------------------------
 // Majority voter
 //------------------------------------------------
-maj_vote Majority_voter( .clk(clk), .rst(rst),
+maj_vote #(.cmd_l(cmd_l)) Majority_voter( .clk(clk), .rst(rst),
                          .state(state),
                          .s1_cmd(s1_cmd), .s2_cmd(s2_cmd), .s3_cmd(s3_cmd),
                          .d1_cmd(d1_cmd), .d2_cmd(d2_cmd), .d3_cmd(d3_cmd),
                          .speed_cmd_o(speed_cmd_o), .dir_cmd_o(dir_cmd_o),
-                         .fault(fault)
+                         .fault(fault),
+                         .speed_cmd_prev(speed_cmd_prev), .dir_cmd_prev(dir_cmd_prev)
                         );
 
 endmodule
