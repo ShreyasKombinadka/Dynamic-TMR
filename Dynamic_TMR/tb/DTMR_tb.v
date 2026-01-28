@@ -13,7 +13,8 @@ wire [2:0] fault ;          // Faulty module
 wire state_o ;              // State probe for monitoring
 
 
-DTMR dut(.clk(clk), .rst(rst),
+DTMR #(.def_speed_cmd(5), .def_dir_cmd(8), .cmd_l(4), .max_fault_count(5))
+        dut(.clk(clk), .rst(rst),
             .speed_cmd_i(speed_cmd_i), .dir_cmd_i(dir_cmd_i), .mode(mode),
             .err_rate(err_rate), .f1(f1), .f2(f2), .b1(b1), .b2(b2),
             .speed_cmd_o(speed_cmd_o), .dir_cmd_o(dir_cmd_o), .fault(fault), .state_o(state_o));
