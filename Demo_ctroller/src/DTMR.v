@@ -1,10 +1,10 @@
 module DTMR #(
         parameter
+        cmd_l = 4,                      // Command lengt
         def_speed_cmd = 5,              // Default speed command
         def_dir_cmd = 8,                // Default speed command
-        cmd_l = 4,                      // Command length
         max_tmr_fault_count = 5,        // Max faults for tmr
-        max_err_rate_received = 5       // Max err rate in the received data
+        max_err_rate = 5       // Max err rate in the received data
 )(
     input clk, rst,                     // Clock and Reset
     input [cmd_l-1:0] speed_cmd_i,      // Received speed command
@@ -24,7 +24,7 @@ module DTMR #(
 //------------------------------------------------
 wire [2:0] en ; // Enable signal for tmr modules
 wire state ;    // state signal for voter
-ctrl #(.max_tmr_fault_count(max_tmr_fault_count), .max_err_rate_received(max_err_rate_received)) TMR_Control(.clk(clk), .rst(rst), .f1(f1), .f2(f2), .b1(b1), .b2(b2), .fault(fault), .err_rate(err_rate), .en(en), .state(state));
+ctrl #(.max_tmr_fault_count(max_tmr_fault_count), .max_err_rate(max_err_rate)) TMR_Control(.clk(clk), .rst(rst), .f1(f1), .f2(f2), .b1(b1), .b2(b2), .fault(fault), .err_rate(err_rate), .en(en), .state(state));
 
 
 assign state_o = state ; // State probe for monitoring

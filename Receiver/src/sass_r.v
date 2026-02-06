@@ -27,7 +27,7 @@ always @(posedge clk or posedge rst)
 begin
     if(rst)    // Reset
     begin
-        data = 0 ;
+        data <= 0 ;
         count <= 0 ;
         data_r <= 0 ;
         en <= 0 ;

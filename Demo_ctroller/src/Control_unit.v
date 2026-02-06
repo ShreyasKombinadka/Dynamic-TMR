@@ -1,7 +1,7 @@
 module ctrl #(
     parameter
     max_tmr_fault_count = 5,    // Max faults for tmr
-    max_err_rate_received = 5   // Max err rate in the received data
+    max_err_rate = 5            // Max err rate in the received data
 )(
     input clk, rst,         // Clock and Reset
     input f1, f2,           // Front sensors
@@ -23,7 +23,7 @@ reg [3:0] tmr3_fault_count ;    // Fault counter for TMR3
 
 always @( * )
 begin
-    state = ((( f2 & b2 ) & ( f1 | b1 )) | (( f1 & b1 ) & ( b2 | f2 ))) | ( err_rate > max_err_rate_received ) ; // Activate only when 3 or more sesors are triggered or error rate crosses 50%
+    state = ((( f2 & b2 ) & ( f1 | b1 )) | (( f1 & b1 ) & ( b2 | f2 ))) | ( err_rate > max_err_rate ) ; // Activate only when 3 or more sesors are triggered or error rate crosses 50%
 
     en = 0 ;
     if(state) en = ~(dis_tmr) ; // Only the modules that are not flagged for disabling
